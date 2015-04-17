@@ -1,0 +1,177 @@
+nocaptcha-bitrix
+================
+
+== Краткое описание
+
+Модуль CMS Bitrix для работы с сервисом Некапча Mail.Ru.
+
+Некапча - это интеллектуальный сервис капчи, способный избавить большинство
+реальных пользователей от разгадывания рисунка капчи, вместе с тем не ухудшая
+защиту от спам-ботов. Сервис успешно используется как в наших внутренних
+проектах, так и на сайтах, не связанных с Mail.Ru.
+
+Подробнее: https://nocaptcha.mail.ru[сайт],
+https://nocaptcha.mail.ru/docs[документация],
+http://habrahabr.ru/company/mailru/blog/255633/[статья на Хабрахабре]
+
+Обратная связь: nocaptcha@corp.mail.ru
+
+== Установка
+
+Перед использованием модуля необходимо зарегистрировать свой домен на
+https://nocaptcha.mail.ru[сайте Некапчи].
+
+1. Копируем директорию _nocaptcha_ в _bitrix/modules_.
+2. Устанавливаем модуль в административной панели в разделе _Настройки >
+Настройки продукта > Модули_.
+3. Настраиваем модуль в административной панели в разделе _Настройки >
+Настройки продукта > Настройки модулей > Некапча Mail.Ru_.
+
+== Настройка
+
+Публичный и секретный ключ::
+    Ключи для генерации скрипта Некапчи и проверки введенного кода.
+    Создаются при регистрации домена на сайте Некапчи.
+
+Использовать русскоязычный виджет для языков (через запятую)::
+    Коды языков, для которых виджет будет отображаться на русском языке. Для
+    всех других языков - на английском. Пример: +ru,be,kz,uk+.
+
+Заменить стандартную капчу (требуется отредактировать шаблоны)::
+    Позволяет заменить стандартную капчу CMS Bitrix на Некапчу Mail.Ru. Для
+    полной замены требуется отредактировать шаблоны, где используется
+    стандартная капча.
+
+== Использование
+
+=== Добавление виджета
+
+Виджет можно встроить в визуальном редакторе. Он расположен в списке
+компонентов _Компоненты > Служебные > Виджет Некапчи Mail.Ru_.
+
+Другим способом добавления является вызов компонента из кода:
+
+[source,php]
+----
+global $APPLICATION;
+$APPLICATION->IncludeComponent("mailru:nocaptcha.widget", "");
+----
+
+Встраивание скрипта и настроек в +head+ страницы, добавление контейнера происходит
+автоматически.
+
+Доступные параметры компонента:
+
++ID+:: ID контейнера. По умолчанию генерируется автоматически.
++TABINDEX+:: tabindex поля для ввода кода. Требуется для корректной
+настройки последовательности переключения полей по TAB.
+
+[source,php]
+----
+global $APPLICATION;
+$APPLICATION->IncludeComponent("mailru:nocaptcha.widget", "",
+                               array("TABINDEX" => "4"));
+----
+
+Шаблон компонента всегда используется стандартный и менять его нельзя.
+
+=== Проверка введенного кода
+
+Если виджет Некапчи встроен в форму корректно, то в обработчик передаются
+параметры +captcha_id+ и +captcha_value+. Пример кода для проверки капчи:
+
+[source,php]
+----
+CModule::IncludeModule("nocaptcha");
+if (CNocaptcha::GetInstance()->Check($_REQUEST["captcha_id"],
+                                     $_REQUEST["captcha_value"]) === true)
+{
+    // ок
+}
+else
+{
+    // введен неверный код
+}
+----
+
+Если в настройках установлена замена стандартной капчи, то для проверки можно
+использовать стандартную функцию +CaptchaCheckCode()+:
+
+[source,php]
+----
+global $APPLICATION;
+if ($APPLICATION->CaptchaCheckCode($_REQUEST["captcha_value"],
+                                   $_REQUEST["captcha_id"]))
+{
+    // ок
+}
+else
+{
+    // введен неверный код
+}
+----
+
+== FAQ
+
+=== Как отредактировать шаблон со стандартной капчей?
+
+1. Если шаблон системный, то копируем его в текущий шаблон сайта. Например, из
+_bitrix/components/bitrix/system.auth.registration/templates/.default_ в
+_bitrix/templates/my_site_template/components/bitrix/system.auth.registration/.default_.
+2. В шаблоне заменяем верстку стандартной капчи на вызов компонента виджета
+Некапчи.
++
+Было:
++
+[source,php]
+----
+<?
+if ($arResult["USE_CAPTCHA"] == "Y")
+{
+    ?>
+    <tr>
+        <td colspan="2"><b><?=GetMessage("CAPTCHA_REGF_TITLE")?></b></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>
+            <input type="hidden" name="captcha_sid" value="<?=$arResult["CAPTCHA_CODE"]?>" />
+            <img src="/bitrix/tools/captcha.php?captcha_sid=<?=$arResult["CAPTCHA_CODE"]?>" width="180" height="40" alt="CAPTCHA" />
+        </td>
+    </tr>
+    <tr>
+        <td><span class="starrequired">*</span><?=GetMessage("CAPTCHA_REGF_PROMT")?>:</td>
+        <td><input type="text" name="captcha_word" maxlength="50" value="" /></td>
+    </tr>
+    <?
+}
+?>
+----
++
+Стало:
++
+[source,php]
+----
+<?
+if ($arResult["USE_CAPTCHA"] == "Y")
+{
+    ?>
+    <tr>
+        <td colspan="2"><b><?=GetMessage("CAPTCHA_REGF_TITLE")?></b></td>
+    </tr>
+    <tr>
+        <td><span class="starrequired">*</span></td>
+        <td><? $APPLICATION->IncludeComponent("mailru:nocaptcha.widget"); ?></td>
+    </tr>
+    <?
+}
+?>
+----
+
+== Лицензия
+
+image:http://i.creativecommons.org/p/zero/1.0/88x31.png["CC0",link="http://creativecommons.org/publicdomain/zero/1.0/"]
+
+По мере возможности в соответствии с законодательством, Mail.Ru отказался от
+всех авторских прав и смежных прав на модуль CMS Bitrix для работы с сервисом
+Некапча Mail.Ru
