@@ -2,7 +2,7 @@
 
 CModule::IncludeModule("nocaptcha");
 
-if (isset($arParams["ID"]))
+if (isset($arParams["ID"]) && $arParams["ID"] != "")
 {
     $arResult["ID"] = $arParams["ID"];
     CNocaptcha::GetInstance()->AddContainerId($arResult["ID"]);
