@@ -1,6 +1,6 @@
 <?
 
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/nocaptcha/default_option.php");
+require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/mailru.nocaptcha/default_option.php");
 
 class CNocaptcha
 {
@@ -24,13 +24,13 @@ class CNocaptcha
 
     protected function __construct()
     {
-        $this->publicKey = COption::GetOptionString("nocaptcha", "public_key",
+        $this->publicKey = COption::GetOptionString("mailru.nocaptcha", "public_key",
                                                     $nocaptcha_default_option["public_key"]);
-        $this->privateKey = COption::GetOptionString("nocaptcha", "private_key",
+        $this->privateKey = COption::GetOptionString("mailru.nocaptcha", "private_key",
                                                      $nocaptcha_default_option["private_key"]);
-        $t = COption::GetOptionString("nocaptcha", "ru_langs",
+        $t = COption::GetOptionString("mailru.nocaptcha", "ru_langs",
                                       $nocaptcha_default_option["ru_langs"]);
-        $this->arRuLangs = split("[^[:alnum:]]+", $t);
+        $this->arRuLangs = preg_split("/[^[:alnum:]]+/", $t, -1, PREG_SPLIT_NO_EMPTY);
     }
 
     private function __clone()

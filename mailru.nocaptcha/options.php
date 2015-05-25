@@ -2,7 +2,7 @@
 if (!$USER->IsAdmin())
     return;
 
-define(BX_NOCAPTCHA_MODULE_ID, "nocaptcha");
+define(BX_NOCAPTCHA_MODULE_ID, "mailru.nocaptcha");
 
 IncludeModuleLangFile($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/options.php");
 IncludeModuleLangFile(__FILE__);

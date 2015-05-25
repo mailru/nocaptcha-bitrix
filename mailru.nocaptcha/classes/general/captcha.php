@@ -12,7 +12,7 @@ class CCaptcha
 {
     public function CheckCode($captchaValue, $captchaId)
     {
-        CModule::IncludeModule('nocaptcha');
+        CModule::IncludeModule('mailru.nocaptcha');
         if (CNocaptcha::GetInstance()->Check($captchaId, $captchaValue) === true)
             return true;
         return false;

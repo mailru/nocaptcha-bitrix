@@ -1,6 +1,6 @@
 <?
 
-CModule::IncludeModule("nocaptcha");
+CModule::IncludeModule("mailru.nocaptcha");
 
 if (isset($arParams["ID"]) && $arParams["ID"] != "")
 {
